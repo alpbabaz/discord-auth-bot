@@ -1,0 +1,6 @@
+{
+  "discord_token": "BOT_TOKENINIZI_BURAYA_YAZIN",
+  "admin_ids": ["ADMIN_DISCORD_ID_BURAYA"],
+  "site_port": 3000,
+  "site_name": "Novex Bypass"
+}

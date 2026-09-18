@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novex Auth v1.0</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ============ SIDEBAR ============ -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <img src="/images/logo.png" alt="Novex" class="logo-img" id="logoImg">
+          <div class="logo-glow"></div>
+        </div>
+        <h1 class="brand-name">Novex <span>Bypass</span></h1>
+      </div>
+
+      <nav class="sidebar-nav">
+        <!-- GENEL -->
+        <div class="nav-category">
+          <div class="category-title">
+            <span class="cat-icon">&#9632;</span> GENEL
+          </div>
+          <a href="#" class="nav-item active" data-panel="dashboard">
+            <span class="nav-icon">&#9679;</span> Dashboard
+          </a>
+        </div>
+
+        <!-- KULLANICILAR -->
+        <div class="nav-category">
+          <div class="category-title">
+            <span class="cat-icon">&#9632;</span> KULLANICILAR
+          </div>
+          <a href="#" class="nav-item" data-panel="key-management">
+            <span class="nav-icon">&#9679;</span> Key Yonetimi
+          </a>
+          <a href="#" class="nav-item" data-panel="active-sessions">
+            <span class="nav-icon">&#9679;</span> Aktif Oturumlar
+          </a>
+          <a href="#" class="nav-item" data-panel="whitelist-panel">
+            <span class="nav-icon">&#9679;</span> Whitelist
+          </a>
+        </div>
+
+        <!-- OPERASYON -->
+        <div class="nav-category">
+          <div class="category-title">
+            <span class="cat-icon">&#9632;</span> OPERASYON
+          </div>
+          <a href="#" class="nav-item" data-panel="system-console">
+            <span class="nav-icon">&#9679;</span> Konsol
+          </a>
+          <a href="#" class="nav-item" data-panel="system-logs">
+            <span class="nav-icon">&#9679;</span> Sistem Loglari
+          </a>
+          <a href="#" class="nav-item" data-panel="alerts">
+            <span class="nav-icon">&#9679;</span> Akilli Uyarilar
+          </a>
+          <a href="#" class="nav-item" data-panel="banned-ips">
+            <span class="nav-icon">&#9679;</span> Banli IP'ler
+          </a>
+          <a href="#" class="nav-item" data-panel="wl-ips">
+            <span class="nav-icon">&#9679;</span> WL IP'ler
+          </a>
+        </div>
+
+        <!-- AYARLAR -->
+        <div class="nav-category">
+          <div class="category-title">
+            <span class="cat-icon">&#9632;</span> AYARLAR
+          </div>
+          <a href="#" class="nav-item" data-panel="settings-panel">
+            <span class="nav-icon">&#9679;</span> Sistem Ayarlari
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="panic-status" id="panicStatus">
+          <span class="panic-dot"></span> Sistem Aktif
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ AUTH OVERLAY ============ -->
+    <div id="authOverlay">
+      <div class="auth-modal">
+        <div class="auth-logo">
+          <img src="/images/logo.png" alt="Novex" class="auth-logo-img">
+          <h2>Novex <span>Auth</span></h2>
+        </div>
+        <p class="auth-subtitle">Erisim icin key giriniz</p>
+        <input type="text" id="keyInput" placeholder="NX-XXXXXXXXXXXXXXXXXXXXXXXX" autocomplete="off">
+        <button id="loginBtn">Giris Yap</button>
+        <div class="auth-error" id="authError"></div>
+        <div class="auth-info">Key, Discord bot uzerinden alinir.</div>
+      </div>
+    </div>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main id="mainContent">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <span id="wlGreeting">Hos Geldin</span>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn refresh-btn" id="refreshBtn" title="Yenile">&#8635;</button>
+          <button class="topbar-btn panic-btn" id="panicBtn" title="Panic Mode">&#9760;</button>
+        </div>
+      </div>
+
+      <!-- ==================== DASHBOARD PANEL ==================== -->
+      <section class="panel active" id="panel-dashboard">
+        <div class="panel-header">
+          <h2>Dashboard</h2>
+          <span class="panel-badge" id="panelBadge"></span>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon">&#128273;</div>
+            <div class="stat-value" id="statTotalKeys">0</div>
+            <div class="stat-label">Toplam Key</div>
+            <div class="stat-glow"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">&#128308;</div>
+            <div class="stat-value" id="statActiveKeys">0</div>
+            <div class="stat-label">Aktif Key</div>
+            <div class="stat-glow"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">&#128187;</div>
+            <div class="stat-value" id="statOnline">0</div>
+            <div class="stat-label">Online Kullanici</div>
+            <div class="stat-glow"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">&#9202;</div>
+            <div class="stat-value" id="statAvgAuth">0s</div>
+            <div class="stat-label">Ort. Oturum Suresi</div>
+            <div class="stat-glow"></div>
+          </div>
+        </div>
+
+        <!-- Status Report -->
+        <div class="section-title">Durum Raporu</div>
+        <div class="status-circles">
+          <div class="circle-card">
+            <svg class="circle-progress" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#gradToday)" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="251.2" stroke-dashoffset="251.2" id="circleToday" transform="rotate(-90,50,50)"/>
+              <defs><linearGradient id="gradToday"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#888"/></linearGradient></defs>
+            </svg>
+            <div class="circle-content">
+              <span class="circle-value" id="circleTodayVal">0</span>
+              <span class="circle-label">Bugun</span>
+            </div>
+          </div>
+          <div class="circle-card">
+            <svg class="circle-progress" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#gradMonth)" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="251.2" stroke-dashoffset="251.2" id="circleMonth" transform="rotate(-90,50,50)"/>
+              <defs><linearGradient id="gradMonth"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#666"/></linearGradient></defs>
+            </svg>
+            <div class="circle-content">
+              <span class="circle-value" id="circleMonthVal">0</span>
+              <span class="circle-label">Bu Ay</span>
+            </div>
+          </div>
+          <div class="circle-card">
+            <svg class="circle-progress" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,0,0,0.1)" stroke-width="6"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#ff3333" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="251.2" stroke-dashoffset="251.2" id="circleFailed" transform="rotate(-90,50,50)"/>
+            </svg>
+            <div class="circle-content">
+              <span class="circle-value" style="color:#ff3333" id="circleFailedVal">0</span>
+              <span class="circle-label">Basarisiz</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- License Summary -->
+        <div class="section-title">Lisans Ozeti</div>
+        <div class="license-grid">
+          <div class="license-item">
+            <span class="license-label">Toplam Lisans</span>
+            <span class="license-val" id="licTotal">0</span>
+          </div>
+          <div class="license-item">
+            <span class="license-label">Aktif Lisans</span>
+            <span class="license-val" id="licActive">0</span>
+          </div>
+          <div class="license-item">
+            <span class="license-label">Suresi Dolmus</span>
+            <span class="license-val expired" id="licExpired">0</span>
+          </div>
+          <div class="license-item">
+            <span class="license-label">Banli</span>
+            <span class="license-val banned" id="licBanned">0</span>
+          </div>
+          <div class="license-item">
+            <span class="license-label">Kullanim Orani</span>
+            <span class="license-val" id="licUsage">%0</span>
+          </div>
+          <div class="license-item">
+            <span class="license-label">Bugunku Giris</span>
+            <span class="license-val" id="licToday">0</span>
+          </div>
+        </div>
+
+        <!-- Recent Logins Table -->
+        <div class="section-title">
+          Son Girisler
+          <button class="btn-sm" id="showAllReports">Tum Raporlari Goster</button>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>WL Adi</th><th>Key</th><th>IP</th><th>Tarih</th></tr>
+            </thead>
+            <tbody id="recentLoginsBody"></tbody>
+          </table>
+        </div>
+
+        <!-- All Reports Modal -->
+        <div class="modal-overlay" id="allReportsModal">
+          <div class="modal">
+            <div class="modal-header">
+              <h3>Tum Raporlar</h3>
+              <button class="modal-close" id="closeReports">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="table-container" style="max-height:400px;overflow-y:auto;">
+                <table class="data-table">
+                  <thead><tr><th>WL</th><th>Key</th><th>Aksiyon</th><th>IP</th><th>Tarih</th></tr></thead>
+                  <tbody id="allReportsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== KEY MANAGEMENT PANEL ==================== -->
+      <section class="panel" id="panel-key-management">
+        <div class="panel-header"><h2>Key Yonetimi</h2></div>
+
+        <div class="key-actions">
+          <div class="key-action-card">
+            <h4>Key Olustur</h4>
+            <div class="form-row">
+              <input type="text" id="keyWlName" placeholder="WL Adi">
+              <select id="keyDuration">
+                <option value="30">30 Dakika</option>
+                <option value="60">1 Saat</option>
+                <option value="120">2 Saat</option>
+                <option value="360">6 Saat</option>
+                <option value="720">12 Saat</option>
+                <option value="1440">24 Saat</option>
+                <option value="10080">7 Gun</option>
+                <option value="43200">30 Gun</option>
+              </select>
+              <button class="btn-primary" id="genKeyBtn">Key Olustur</button>
+            </div>
+            <div class="generated-key" id="generatedKey" style="display:none;"></div>
+          </div>
+
+          <div class="key-action-card">
+            <h4>Toplu Key Olustur</h4>
+            <div class="form-row">
+              <input type="text" id="bulkWlName" placeholder="WL Adi">
+              <input type="number" id="bulkCount" placeholder="Adet" min="1" max="100" value="5">
+              <select id="bulkDuration">
+                <option value="30">30 Dakika</option>
+                <option value="60">1 Saat</option>
+                <option value="1440">24 Saat</option>
+                <option value="10080">7 Gun</option>
+              </select>
+              <button class="btn-primary" id="bulkGenBtn">Toplu Olustur</button>
+            </div>
+            <div class="generated-key" id="bulkGeneratedKeys" style="display:none;"></div>
+          </div>
+
+          <div class="key-action-card">
+            <h4>Key Islemleri</h4>
+            <div class="form-row">
+              <input type="text" id="operationKeyId" placeholder="Key ID">
+              <button class="btn-warning" id="extendKeyBtn">Sure Ekle</button>
+              <select id="extendDuration">
+                <option value="30">+30dk</option>
+                <option value="60">+1s</option>
+                <option value="120">+2s</option>
+                <option value="1440">+24s</option>
+              </select>
+            </div>
+            <div class="form-row" style="margin-top:8px;">
+              <button class="btn-danger" id="banKeyBtn">Banla</button>
+              <button class="btn-warning" id="unbanKeyBtn">Ban Kaldir</button>
+              <button class="btn-danger" id="deleteKeyBtn">Sil</button>
+              <button class="btn-secondary" id="resetHwidBtn">HWID Sifirla</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Tum Keyler</div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>WL Adi</th><th>Key</th><th>Sure</th><th>Bitis</th><th>Durum</th><th>Online</th><th>Kullanim</th><th>Islem</th></tr>
+            </thead>
+            <tbody id="keysTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== ACTIVE SESSIONS PANEL ==================== -->
+      <section class="panel" id="panel-active-sessions">
+        <div class="panel-header">
+          <h2>Aktif Oturumlar</h2>
+          <button class="btn-danger btn-sm" id="killAllSessions">Tumunu Sonlandir</button>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>WL Adi</th><th>Key</th><th>IP</th><th>Giris</th><th>Son Aktif</th><th>Islem</th></tr>
+            </thead>
+            <tbody id="sessionsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== WHITELIST PANEL ==================== -->
+      <section class="panel" id="panel-whitelist-panel">
+        <div class="panel-header"><h2>Whitelist Yonetimi</h2></div>
+        <div class="key-action-card">
+          <div class="form-row">
+            <input type="text" id="wlNameInput" placeholder="WL Adi">
+            <input type="text" id="wlDiscordInput" placeholder="Discord ID">
+            <button class="btn-primary" id="addWlBtn">WL Ekle</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>WL Adi</th><th>Discord ID</th><th>Eklenme</th><th>Islem</th></tr></thead>
+            <tbody id="wlTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== CONSOLE PANEL ==================== -->
+      <section class="panel" id="panel-system-console">
+        <div class="panel-header"><h2>Operasyon Konsolu</h2></div>
+        <div class="console-container" id="consoleOutput">
+          <div class="console-line"><span class="console-time">[SISTEM]</span> Konsol hazir...</div>
+        </div>
+        <div class="console-input-row">
+          <span class="console-prompt">&gt;</span>
+          <input type="text" id="consoleInput" placeholder="Komut girin... (help)" class="console-input-field">
+        </div>
+      </section>
+
+      <!-- ==================== SYSTEM LOGS PANEL ==================== -->
+      <section class="panel" id="panel-system-logs">
+        <div class="panel-header">
+          <h2>Sistem Loglari</h2>
+          <button class="btn-danger btn-sm" id="clearLogsBtn">Loglari Temizle</button>
+        </div>
+        <div class="console-container" id="logsOutput" style="max-height:500px;overflow-y:auto;"></div>
+      </section>
+
+      <!-- ==================== ALERTS PANEL ==================== -->
+      <section class="panel" id="panel-alerts">
+        <div class="panel-header">
+          <h2>Akilli Uyarilar</h2>
+          <button class="btn-secondary btn-sm" id="markAllRead">Tumunu Okundu Isaretle</button>
+        </div>
+        <div id="alertsList"></div>
+      </section>
+
+      <!-- ==================== BANNED IPs PANEL ==================== -->
+      <section class="panel" id="panel-banned-ips">
+        <div class="panel-header"><h2>Banli IP'ler</h2></div>
+        <div class="key-action-card">
+          <div class="form-row">
+            <input type="text" id="banIpInput" placeholder="IP Adresi">
+            <input type="text" id="banIpReason" placeholder="Sebep">
+            <button class="btn-danger" id="banIpBtn">IP Banla</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>IP</th><th>Sebep</th><th>Tarih</th><th>Islem</th></tr></thead>
+            <tbody id="bannedIpsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== WL IPs PANEL ==================== -->
+      <section class="panel" id="panel-wl-ips">
+        <div class="panel-header"><h2>Whitelist IP'ler</h2></div>
+        <div class="key-action-card">
+          <div class="form-row">
+            <input type="text" id="wlIpInput" placeholder="IP Adresi">
+            <input type="text" id="wlIpDesc" placeholder="Aciklama">
+            <button class="btn-primary" id="wlIpAddBtn">IP Ekle</button>
+            <button class="btn-danger btn-sm" id="wlIpMyIpBtn" style="margin-left:8px;">IP'mi Ekle</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>IP</th><th>Aciklama</th><th>Tarih</th><th>Islem</th></tr></thead>
+            <tbody id="wlIpsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== SETTINGS PANEL ==================== -->
+      <section class="panel" id="panel-settings-panel">
+        <div class="panel-header"><h2>Sistem Ayarlari</h2></div>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label>Maks Oturum / Key</label>
+            <input type="number" id="setMaxSessions" value="5" min="1" max="50">
+            <button class="btn-primary btn-sm save-setting" data-key="max_sessions_per_key">Kaydet</button>
+          </div>
+          <div class="setting-item">
+            <label>Site Adi</label>
+            <input type="text" id="setSiteName" value="Novex Auth">
+            <button class="btn-primary btn-sm save-setting" data-key="site_name">Kaydet</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

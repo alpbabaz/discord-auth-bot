@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PANIC MODE | Novex</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0000;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { background: #0a0000; }
+      50% { background: #140000; }
+    }
+    .container { text-align: center; }
+    .icon { font-size: 100px; margin-bottom: 20px; }
+    h1 { font-size: 48px; color: #ff0000; text-shadow: 0 0 30px rgba(255,0,0,0.7), 0 0 60px rgba(255,0,0,0.3); letter-spacing: 8px; }
+    p { color: #aa4444; margin-top: 15px; font-size: 16px; }
+    .bar {
+      margin: 30px auto; width: 200px; height: 3px;
+      background: linear-gradient(90deg, transparent, #ff0000, transparent);
+      animation: barPulse 1.5s infinite;
+    }
+    @keyframes barPulse { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">&#9888;</div>
+    <h1>PANIC MODE</h1>
+    <div class="bar"></div>
+    <p>Sistem guvenlik nedeniyle gecici olarak kapatilmistir.</p>
+    <p style="font-size:13px;color:#661111;margin-top:10px;">Yalnizca admin paneli uzerinden tekrar acilabilir.</p>
+  </div>
+</body>
+</html>
